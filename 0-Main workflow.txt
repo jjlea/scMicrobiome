@@ -1,0 +1,282 @@
+#########  GWAS data preprocess --Shell ######### 
+
+cd $myGWAS_file
+for k in *.tsv
+do
+   Rscript $myproject_file/Rscript/removeMHC.R $k 
+done
+
+
+######### MAGMA processing ######### 
+# input file
+gwasfile=$myGWAS_file
+# output file：
+magmafile=$myMAGMA_file
+
+#SNP  Annotation-shell
+for k in *_removeMHC.tsv
+do
+cat $gwasfile/${k} | awk -v OFS=" " '{print $4,$2,$3,$11,$10}' > $magmafile/${k/.tsv/.magmainput}
+$mydir/soft/magma/magma \
+--annotate window=10,10 \
+--snp-loc $magmafile/${k/.tsv/.magmainput} \
+--out $magmafile/${k/.tsv/} \
+--gene-loc $mydir/magma/locations/NCBI37.3.gene.loc
+done
+
+# lm-shell
+for k in  *_removeMHC.tsv
+do
+$mydir/soft/magma/magma \
+--bfile $mydir/magma/1000G_data/g1000_eur \
+--pval $magmafile/${k/.tsv/.magmainput}  use='rsID,P.weightedSumZ' ncol='N' \
+--gene-annot $magmafile/${k/.tsv/.genes.annot} \
+--out $magmafile/${k/.tsv/} 
+done
+
+# merge z-scores--shell
+magmafile=$myMAGMA_file
+scdrsfile=$mydir/$myprojrct
+# mkdir output.MAGMA
+cd $magmafile
+for k in *_removeMHC.genes.out
+do 
+cat ${magmafile}/$k | awk -v OFS="\t" '{print $1,$8}' > ${scdrsfile}/output.MAGMA/${k/.out/.zscore}
+done
+cd $scdrsfile/output.MAGMA
+python $mydir/scripts/merge_tables.py *.genes.zscore > ../zscore_merged.txt
+
+
+# transform gene id
+## R code
+
+setwd("$mydir/$myprojrct")
+z <- read.table("zscore_merged.txt",header=T, stringsAsFactors=F)
+ID <- read.table("$mydir/magma/locations/NCBI37.3.gene.loc", header=F, stringsAsFactors=F)
+k <- ID[match(z$ID, ID$V1),"V6"]
+z$ID <- k
+z2 <- z[-nrow(z),]
+write.table(z2, file="zscore_merged2.txt", sep="\t", row.names=F, quote=F)
+
+
+######### Select top 1,000 genes and use z-score weights-shell #########  
+cd $mydir/$myprojrct
+outdir=$mydir/$myprojrct
+scdrs munge-gs \
+    --out-file ${outdir}/zscore_merged2.gs \
+    --zscore-file  ${outdir}/zscore_merged2.txt  \
+    --weight zscore \
+    --n-max 1000
+
+#########   calculating BPS --python #########  
+
+from anndata import AnnData
+from scipy import stats
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+import os
+import scdrs
+import warnings
+import scanpy as sc
+import gc
+from sklearn.externals import joblib
+
+
+ff1= ['%s','%.5f','%.8f',"%.4e","%.4e",'%.5f','%.6f']
+ff2=['%.5f']*1000
+ff = ff1 + ff2
+
+def df2csv(df,fname,myformats=[],sep='\t'):
+  """
+    # function is faster than to_csv
+    # 7 times faster for numbers if formats are specified, 
+    # 2 times faster for strings.
+    # Note - be careful. It doesn't add quotes and doesn't check
+    # for quotes or separators inside elements
+    # We've seen output time going down from 45 min to 6 min 
+    # on a simple numeric 4-col dataframe with 45 million rows.
+  """
+  if len(df.columns) <= 0:
+    return
+  Nd = len(df.columns)
+  Nd_1 = Nd - 1
+  formats = myformats[:] # take a copy to modify it
+  Nf = len(formats)
+  # make sure we have formats for all columns
+  if Nf < Nd:
+    for ii in range(Nf,Nd):
+      coltype = df[df.columns[ii]].dtype
+      ff = '%s'
+      if coltype == np.int64:
+        ff = '%d'
+      elif coltype == np.float64:
+        ff = '%f'
+      formats.append(ff)
+  fh=open(fname,'w')
+  fh.write('\t'.join(df.columns) + '\n')
+  for row in df.itertuples(index=False):
+    ss = ''
+    for ii in range(Nd):
+      ss += formats[ii] % row[ii]
+      if ii < Nd_1:
+        ss += sep
+    fh.write(ss+'\n')
+  fh.close()
+
+
+OUT_FOLDER='$mydir/$myprojrct/output.scDRS'
+df_gs = scdrs.util.load_gs("$mydir/$myprojrct/zscore_merged2.gs")
+ls = pd.read_csv("$mydir/$myprojrct/zscore_merged2.gs", sep="\t", index_col=0)
+
+from sklearn.externals import joblib
+adata=sc.read_h5ad("$mydir/humanatlas.h5ad")
+df_cov = pd.DataFrame(adata.obs["nFeature_RNA"])
+adata.var.index=adata.var["features"]
+scdrs.preprocess(adata,cov=df_cov)
+joblib.dump(adata, '$mydir/adata_full.preprocessed.pkl') 
+
+for i in range(0, n):
+    adata = joblib.load('$mydir/adata_full.preprocessed.pkl') 
+    trait=ls.index[i]
+    gene_list = df_gs[trait][0]
+    gene_weight = df_gs[trait][1]
+    df_res = scdrs.score_cell(adata, gene_list, gene_weight=gene_weight, n_ctrl=1000, return_ctrl_norm_score=True)
+    df_res.insert(0, "cell_id", df_res.index)
+    df2csv(df_res,
+           os.path.join(OUT_FOLDER, "%s.full_score" % trait),
+           myformats=ff) 
+    
+    df2csv(df_res.iloc[:, 0:7],
+           os.path.join(OUT_FOLDER, "%s.score" % trait),
+           myformats=ff1) 
+    del df_res
+    del adata
+    gc.collect()
+
+# merge norm BPS table -- python
+import os
+import pandas as pd
+
+os.chdir("$mydir/$myprojrct/output")
+df_gs = pd.read_csv("list", header=None) 
+# "list" is a txt file for all outputfile names
+dict_df_stats = {
+    trait: pd.read_csv(trait, sep="\t", index_col=0)
+    for trait in df_gs.iloc[ : ,0]
+    }
+trait_list = list(dict_df_stats.keys())
+
+df_norm = pd.concat(
+    [dict_df_stats[trait]["norm_score"] for trait in trait_list], axis=1
+)
+df_norm.columns = trait_list
+
+os.chdir("$mydir/$myprojrct/")
+df_norm.to_csv("$mydir/$myprojrct/1_df_norm_score.tsv", sep="\t")
+
+
+
+
+
+#########   calculate BPSAUC  -- R #########  
+setwd("$mydir/$myprojrct/")
+source("$myproject_file/AUC.R")
+source("$myproject_file/myfun.R")
+library("ggthemes")
+
+outfile="$mydir/$myprojrct/"
+
+save_pheatmap_pdf <- function(x, filename, width=7, height=7) {
+  stopifnot(!missing(x))
+  stopifnot(!missing(filename))
+  pdf(filename, width=width, height=height)
+  grid::grid.newpage()
+  grid::grid.draw(x$gtable)
+  dev.off()
+}
+
+library(DelayedArray)
+
+load("$myproject_file/anno.RData")
+anno$free_annotation2 <- unlist(lapply(anno$free_annotation2, function(x){gsub("/","_",x)}))
+num <- dcast(anno, free_annotation2~"num", fun.aggregate = function(x){length(x)})
+rownames(num) <- as.character(num$free_annotation2)
+ids <- num$free_annotation2[num$num>200] # about 254 cell-types
+
+INFILE <-  "$mydir/$myprojrct/1_df_norm_score.tsv"
+score <- data.table::fread(file=INFILE, header = T,  stringsAsFactors = FALSE)
+score <- data.frame(score)
+rownames(score) <- score$cell_id
+score$cell_id <- NULL
+rankscore <- buildRankings(score)
+
+num <- dcast(anno, organ_tissue~"num", fun.aggregate = function(x){length(x)})
+rownames(num) <- as.character(num$organ_tissue)
+ids <- num$organ_tissue
+ids
+#save(ids, file=paste0(outfile,"percent.0.05.AUC__ids.RData"))
+
+Bac_cells_AUC_0.05_celltype <- calc.AUC2(ids, anno[,c("cell_id","organ_tissue")], rankscore, 0.05)
+#save(Bac_cells_AUC_0.05_celltype, file=paste0(outfile,"percent.0.05.AUC__Bac_cells_AUC_0.05_celltype.RData"))
+
+
+
+
+########## permutation ##########
+
+setwd("$mydir/$myprojrct/randomAUC")
+### permutation
+library(parallel)
+#cl.cores <- detectCores() ; cl.cores  
+cl <- makeCluster(20)
+clusterExport(cl, c('ids','num','anno','rankscore',
+                    'calc.AUC_ram2','perm_cal2','getset','AUC.cellSet2','auc','calc.AUC2')) 
+clusterEvalQ(cl,{
+  library(reshape2)
+  library(data.table)
+  library(DelayedMatrixStats)
+  }) 
+background <- parLapply(cl, ids, function(x){
+    perm_cal2(x,num, 1000, anno, rankscore, 0.05)})
+stopCluster(cl) 
+
+
+#########   Monte carlo  #########  
+library(parallel)
+cl <- makeCluster(2)
+clusterExport(cl, c('Bac_cells_AUC_0.05_celltype','mc_pvalue')) 
+
+clusterEvalQ(cl,{library(ismev)
+  library(scanstatistics)
+  library(evd)
+  }) 
+mc.pvalue_0.05 <- parLapply(cl, rownames(Bac_cells_AUC_0.05_celltype), function(x){
+    file <- paste("./",x ,"_ramd_auc.RData", sep="")
+  # file <- gsub("\"", "",file)
+    load(file)
+    res <- res[c(1),]
+    r <- lapply(colnames(Bac_cells_AUC_0.05_celltype)[c(1)], function(y){
+         p <- mc_pvalue(Bac_cells_AUC_0.05_celltype[x,y], res[y,]) 
+         return(p)
+    })
+    return(r)
+})
+stopCluster(cl) 
+
+#merge tables
+df.mc.p <- data.frame(matrix(unlist(mc.pvalue_0.05), byrow = T, ncol = length(mc.pvalue_0.05[[1]]) ))
+colnames(df.mc.p) <- colnames(Bac_cells_AUC_0.05_celltype)[c(1)]
+rownames(df.mc.p) <- rownames(Bac_cells_AUC_0.05_celltype)
+
+
+df <- merge_tb(Bac_cells_AUC_0.05_celltype[ ,c(1), drop=F], df.mc.p)
+df$mcp.adjust <- NULL
+df$`-mcp.adjust.log` <- NULL
+dim(df)
+df$auc <- as.numeric(df$auc)
+colnames(df)[3]<- "mc.pvalue"
+head(df)
+
+# save(df, file=paste0(outfile,"percent.0.05.AUC__df.RData"))
