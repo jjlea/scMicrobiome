@@ -4,13 +4,10 @@
 
 ### Introduction
 
-
-Microbial genome-wide association studies (GWAS) have uncovered numerous host genetic variants significantly associated with gut microbiota. However, the host genetic control of gut microbiome through key biological pathways within specific cellular context remains largely unknown. Here, we introduce a computational framework for integrating microbial GWAS and single-cell RNA-sequencing profiles of 24 human organs to distinguish critical host tissues and cell types relevant to gut microbes. In this study, we introduce a computational framework (scBPS) to incorporate microbial GWAS summary data with human single-cell transcriptomic data for the discovery of critical cellular contexts that are highly associated with gut microbial taxon. 
+In this study, we introduce a computational framework (scBPS) to incorporate microbial GWAS summary data with human single-cell transcriptomic data for the discovery of critical cellular contexts that are highly associated with gut microbial taxon. 
 
 ![image](https://github.com/jjlea/scMicrobiome/assets/73264824/77cbab3f-4ca5-445f-87c8-0d3bbedf4d9d)
 
-
-By leveraging the largest metagenome-based GWAS data from the Lifelines Dutch Microbiome Project 12 and the high-quality multi-organ single-cell transcriptomic atlas from the Tabula Sapiens Consortium 31, we comprehensively explored the associations of 207 gut microbial taxa with 24 different human tissues and 254 cell types. We exhibit that scBPS performs well in identifying microbe-relevant cellular features at both tissue and cell-type levels. Notably, our results showcase the advantage of our framework by focusing on a hepatocyte-interacting genus Collinsella, illustrating its interaction with central-veinal hepatocyte subpopulation via modulating the activity of cholesterol metabolism. Finally, our study delves into the cellular mechanisms influenced by gut microbes that underlie 10 liver diseases.
 
 ### Documentation
 
@@ -23,6 +20,7 @@ By leveraging the largest metagenome-based GWAS data from the Lifelines Dutch Mi
 **Finally**, the output of our framework includes: (1) the BPS values of each individual host cell for each microbial taxon; (2) BPS~AUC~ scores representing the strength of microbe-cell type associations and the empirical P values. 
 
 
+### Data analysis
 
 
 
