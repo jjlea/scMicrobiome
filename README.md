@@ -1,4 +1,5 @@
-## scBPS: Mapping genome-wide polygenic signals of gut microbiota to human single cell transcriptome profiles uncovers taxon-relevant cellular features and health implications
+## Linking microbial genetic signals and Single-Cell Transcriptomics to Unravel Host-microbe Interactions across Human Tissues
+
 
 
 ### Introduction
@@ -22,13 +23,17 @@ By leveraging the largest metagenome-based GWAS data from the Lifelines Dutch Mi
 **Finally**, the output of our framework includes: (1) the BPS values of each individual host cell for each microbial taxon; (2) BPS~AUC~ scores representing the strength of microbe-cell type associations and the empirical P values. 
 
 
-### Citation
+
 
 
 
 ### Resources
 
-The microbial GWAS summary data of the Dutch microbiome project were downloaded at https://dutchmicrobiomeproject.molgeniscloud.org. The Tabula Sapiens human single-cell transcriptome data were downloaded at https://tabula-sapiens-portal.ds.czbiohub.org/. The GWAS summary data of MiBioGen project were downloaded at https://www.mibiogen.org/. The GWAS summary data of 10 liver-associated diseases were downloaded from the FinnGen database at https://r8.risteys.finngen.fi/. All codes used for the analyses and visualization are provided in the Github repository at https://github.com/jjlea/scMicrobiome. 
+The microbial GWAS summary data of the Dutch microbiome project were downloaded at `https://dutchmicrobiomeproject.molgeniscloud.org`. 
+The Tabula Sapiens human single-cell transcriptome data were downloaded at `https://tabula-sapiens-portal.ds.czbiohub.org/`. 
+The GWAS summary data of MiBioGen project were downloaded at `https://www.mibiogen.org/`. 
+The GWAS summary data of 10 liver-associated diseases were downloaded from the FinnGen database at `https://r8.risteys.finngen.fi/`. 
+All codes used for the analyses and visualization are provided in the Github repository at `https://github.com/jjlea/scMicrobiome`. 
 
 
 
