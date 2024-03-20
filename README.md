@@ -24,17 +24,19 @@ In this study, we introduce a computational framework (scBPS) to incorporate mic
 
 - Preprocess of microbial GWAS summary data:
   
-``` bash
+``` shell
 bash run_removeMHC.sh <GWAS_file> <myproject_file>
 ```
 
 - GWAS data SNP annotation:
 
-`bash annotation.sh <GWAS_file> > <magmafile> <magmadir>`
+```shell
+bash annotation.sh <GWAS_file> > <magmafile> <magmadir>`
+```
 
 - gene z-scores:
 
-```bash
+```shell
 mkdir scfile
 bash gene_anno.sh <GWAS_file> > <magmafile> <magmadir> <myproject_file> <scfile>
 ```
