@@ -24,7 +24,9 @@ In this study, we introduce a computational framework (scBPS) to incorporate mic
 
 - Preprocess of microbial GWAS summary data:
   
-`bash run_removeMHC.sh <GWAS_file> <myproject_file>`
+``` bash
+bash run_removeMHC.sh <GWAS_file> <myproject_file>
+```
 
 - GWAS data SNP annotation:
 
