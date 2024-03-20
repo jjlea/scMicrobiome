@@ -25,39 +25,27 @@ In this study, we introduce a computational framework (scBPS) to incorporate mic
 - Preprocess of microbial GWAS summary data:
   
 ``` shell
-bash run_removeMHC.sh GWAS_file myproject_file
+bash Main-codes/run_removeMHC.sh GWAS_file myproject_file
 ```
 
 - GWAS data SNP annotation:
 
 ```shell
-bash annotation.sh GWAS_file magmafile magmadir`
+bash Main-codes/annotation.sh GWAS_file magmafile magmadir`
 ```
 
 - gene z-scores:
 
 ```shell
 mkdir scfile
-bash gene_anno.sh GWAS_file magmafile magmadir myproject_file scfile
+bash Main-codes/gene_anno.sh GWAS_file magmafile magmadir myproject_file scfile
 ```
 
-- Top 1000 putative microbial genes:
-
-Note: transfer the merged text file into `zscore.gs` file (tab separated) as follows:
-
-The first column: the names of the microbial taxa.
-
-The second column: the selected genes and respective z scores.
-
-For example:
-
-`TRAIT	GENESET
-g__Collinsella	ABO:4.2791,PRKCA:3.5454,HIST3H2A:3.5386...
-s__Bacteroides_eggerthii	MMP20:3.6575,TRAF7:3.6107,NIPBL:3.5778...`
-
-
-
 - Calculating BPS scores:
+
+  ```shell
+python Main-codes/compute.score.py OUT_FOLDER zscore_gsfile sc_humanatlas_h5ad
+  ```
 
 
 
