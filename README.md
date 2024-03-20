@@ -23,7 +23,7 @@ In this study, we introduce a computational framework (scBPS) to incorporate mic
 ### Data analysis
 
 - Preprocess of microbial GWAS summary data:
-
+`Rscript <myproject_file>/Main-codes/removeMHC.R <GWAS_file> `
 
 
 - Top 1000 putative microbial genes:
@@ -34,7 +34,7 @@ In this study, we introduce a computational framework (scBPS) to incorporate mic
 
 
 
-- Calculating BPS<sub>AUC</ub> scores:
+- Calculating BPS<sub>AUC</sub> scores:
 
 
 
