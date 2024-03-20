@@ -34,9 +34,10 @@ bash run_removeMHC.sh <GWAS_file> <myproject_file>
 
 - gene z-scores:
 
-`mkdir scfile
-
-bash gene_anno.sh <GWAS_file> > <magmafile> <magmadir> <myproject_file> <scfile>`
+```bash
+mkdir scfile
+bash gene_anno.sh <GWAS_file> > <magmafile> <magmadir> <myproject_file> <scfile>
+```
 
 
 - Top 1000 putative microbial genes:
