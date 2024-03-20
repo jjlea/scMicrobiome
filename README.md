@@ -38,20 +38,20 @@ bash Main-codes/annotation.sh GWAS_file magmafile magmadir`
 
 ```shell
 mkdir scfile
-bash Main-codes/gene_anno.sh GWAS_file magmafile magmadir myproject_file scfile
+bash main-codes/gene_anno.sh GWAS_file magmafile magmadir myproject_file scfile
 ```
 
 - Calculating BPS scores:
 
-  ```shell
-python Main-codes/compute.score.py OUT_FOLDER zscore_gsfile sc_humanatlas_h5ad
-  ```
-
-
+```shell
+python main-codes/compute.score.py OUT_FOLDER zscore_gsfile sc_humanatlas_h5ad
+```
 
 - Calculating BPS<sub>AUC</sub> scores:
 
-
+```R
+R main-codes/calculate_BPSAUC.R scfile myproject_file
+```
 
 - Monte-Carlo p-values:
 
