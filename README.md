@@ -25,32 +25,32 @@ In this study, we introduce a computational framework (scBPS) to incorporate mic
 - Preprocess of microbial GWAS summary data:
   
 ``` shell
-bash Main-codes/run_removeMHC.sh GWAS_file myproject_file
+bash /main-codes/run_removeMHC.sh GWAS_file myproject_file
 ```
 
 - GWAS data SNP annotation:
 
 ```shell
-bash Main-codes/annotation.sh GWAS_file magmafile magmadir`
+bash /main-codes/annotation.sh GWAS_file magmafile magmadir`
 ```
 
 - gene z-scores:
 
 ```shell
 mkdir scfile
-bash main-codes/gene_anno.sh GWAS_file magmafile magmadir myproject_file scfile
+bash /main-codes/gene_anno.sh GWAS_file magmafile magmadir myproject_file scfile
 ```
 
 - Calculating BPS scores:
 
 ```shell
-python main-codes/compute.score.py OUT_FOLDER zscore_gsfile sc_humanatlas_h5ad
+python /main-codes/compute.score.py OUT_FOLDER zscore_gsfile sc_humanatlas_h5ad
 ```
 
 - Calculating BPS<sub>AUC</sub> scores:
 
 ```R
-R main-codes/calculate_BPSAUC.R scfile myproject_file
+R /main-codes/calculate_BPSAUC.R scfile myproject_file
 ```
 
 - Monte-Carlo p-values:
