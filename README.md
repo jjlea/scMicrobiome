@@ -31,13 +31,15 @@ bash <myfile>/main-codes/run_removeMHC.sh <GWAS_file> <myfile>
 - GWAS data SNP annotation:
 
 ```
+mkdir <outfile1>
 bash <myfile>/main-codes/annotation.sh <GWAS_file> <outfile1> <magmadir>
 ```
 
 - gene z-scores:
 
 ```
-bash <myfile>/main-codes/gene_anno.sh <GWAS_file> <outfile1> <magmadir> <myfile> <scfile>
+mkdir <outfile2>
+bash <myfile>/main-codes/gene_anno.sh <GWAS_file> <outfile1> <magmadir> <myfile> <outfile2>
 
 # <scfile> is the output file.
 ```
@@ -45,19 +47,25 @@ bash <myfile>/main-codes/gene_anno.sh <GWAS_file> <outfile1> <magmadir> <myfile>
 - Calculating BPS scores:
 
 ```
-python <myfile>/main-codes/compute.score.py <outfile2> <scfile>/zscore_merged.gs <single.cell.file>/humanatlas.h5ad
+mkdir <outfile3>
+python <myfile>/main-codes/compute.score.py <outfile3> <outfile2>/zscore_merged.gs <single.cell.file>/humanatlas.h5ad
 ```
 
 - Calculating BPS<sub>AUC</sub> scores:
 
 ```
+
 # cell type level
 
-R <myfile>/main-codes/calculate_BPSAUC_celltype.R  <outfile2> <outfile3> <myfile>
+mkdir <outfile4>
+
+R <myfile>/main-codes/calculate_BPSAUC_celltype.R  <outfile3> <outfile4> <myfile>
 
 # tissue level
 
-R <myfile>/main-codes/calculate_BPSAUC_tissue.R  <outfile2> <outfile3> <myfile>
+mkdir <outfile4>
+
+R <myfile>/main-codes/calculate_BPSAUC_tissue.R  <outfile3> <outfile4> <myfile>
 ```
 
 - Monte-Carlo p-values:
@@ -65,11 +73,15 @@ R <myfile>/main-codes/calculate_BPSAUC_tissue.R  <outfile2> <outfile3> <myfile>
 ```
 # cell type level
 
-R <myfile>/main-codes/MonteCarlo_celltype.R <outfile3> <outfile4> <myfile>
+mkdir <outfile5>
+
+R <myfile>/main-codes/MonteCarlo_celltype.R <outfile4> <outfile5> <myfile>
 
 # tissue level
 
-R <myfile>/main-codes/MonteCarlo_tissue.R <outfile3> <outfile4> <myfile>
+mkdir <outfile5>
+
+R <myfile>/main-codes/MonteCarlo_tissue.R <outfile4> <outfile5> <myfile>
 ```
 
 ### Resources
