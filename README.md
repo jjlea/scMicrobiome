@@ -24,41 +24,53 @@ In this study, we introduce a computational framework (scBPS) to incorporate mic
 
 - Preprocess of microbial GWAS summary data:
   
-``` shell
-bash /main-codes/run_removeMHC.sh GWAS_file myproject_file
+``` 
+bash <myfile>/main-codes/run_removeMHC.sh <GWAS_file> <myfile>
 ```
 
 - GWAS data SNP annotation:
 
-```shell
-bash /main-codes/annotation.sh GWAS_file magmafile magmadir`
+```
+bash <myfile>/main-codes/annotation.sh <GWAS_file> <outfile1> <magmadir>
 ```
 
 - gene z-scores:
 
-```shell
-mkdir scfile
-bash /main-codes/gene_anno.sh GWAS_file magmafile magmadir myproject_file scfile
+```
+bash <myfile>/main-codes/gene_anno.sh <GWAS_file> <outfile1> <magmadir> <myfile> <scfile>
+
+# <scfile> is the output file.
 ```
 
 - Calculating BPS scores:
 
-```shell
-python /main-codes/compute.score.py OUT_FOLDER zscore_gsfile sc_humanatlas_h5ad
+```
+python <myfile>/main-codes/compute.score.py <outfile2> <scfile>/zscore_merged.gs <single.cell.file>/humanatlas.h5ad
 ```
 
 - Calculating BPS<sub>AUC</sub> scores:
 
-```R
-R /main-codes/calculate_BPSAUC.R scfile myproject_file
+```
+# cell type level
+
+R <myfile>/main-codes/calculate_BPSAUC_celltype.R  <outfile2> <outfile3> <myfile>
+
+# tissue level
+
+R <myfile>/main-codes/calculate_BPSAUC_tissue.R  <outfile2> <outfile3> <myfile>
 ```
 
 - Monte-Carlo p-values:
 
+```
+# cell type level
 
+R <myfile>/main-codes/MonteCarlo_celltype.R <outfile3> <outfile4> <myfile>
 
+# tissue level
 
-
+R <myfile>/main-codes/MonteCarlo_tissue.R <outfile3> <outfile4> <myfile>
+```
 
 ### Resources
 
